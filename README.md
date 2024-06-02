@@ -30,4 +30,9 @@ The "product_id" consists of 9 characters and contains encrypted information abo
 - Size: The last 2 characters represent the size of the product. There are 5 sizes “Small”, “Medium”, “Large”, “X-Large”, “XX-Large” in the order of “S1”, “S2”, “S3”, “S4”, “S5”. For example: S1 - Small size
 ### Table 1: sales
 The sales table contains information about the stores' orders for 6 months, each line records 1 product sold.
-<img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/f09a8d22-159d-4e13-b7a3-d5ce099f65c8" alt="..." width="500" />
+<img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/565c8cd4-e782-4983-9468-fac0a39b81da" alt="..." width="500" />
+### Table 2: inventory
+The inventory table provides information about the inventory status of stores within the system.
+Columns BGI to VTB represent the inventory levels at stores, each identified by its corresponding 3-letter code.
+Additionally, it's important to note that some stores only sell women's clothing and do not carry men's clothing. Therefore, caution is needed when transfering to avoid any misleading. Stores that exclusively sell women's clothing and do not carry men's clothing include: DNA, HYE, QNA, QNH, and TBH.
+<img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/1cab6008-beae-47a1-8fa2-0fe76131f21c" alt="..." width="500" />
