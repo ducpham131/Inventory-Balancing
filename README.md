@@ -37,7 +37,7 @@ The sales table contains information about the stores' orders for 6 months, each
 |DNA|1/1/23 10:13|DNA02155|M T|35W3595S3|1|
 |HNO|1/1/23 10:53|HNO01122|M M|22M5734S4|1|
 |VTB|1/1/23 11:05|VTB01351|M H|20M5070S3|1|
-|TBH|1/1/23|11:06|TBH01087|L A T|35W3595S1|1|
+|TBH|1/1/23 11:06|TBH01087|L A T|35W3595S1|1|
 ### Table 2: inventory
 The inventory table provides information about the inventory status of stores within the system.
 Columns BGI to VTB represent the inventory levels at stores, each identified by its corresponding 3-letter code.
