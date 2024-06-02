@@ -11,7 +11,7 @@ Based on the inventory data of the stores in the system, I was tasked with creat
 This task consumes a lot of time and operations when done on spreadsheets when dealing with large amounts of data. So I replaced the spreadsheet with Python to save time and improve performance.
 ## Datasets
 
-<img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/70f63071-4f47-44c5-8cbd-e81bc96492bb" alt="..." width="600" />
+<img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/70f63071-4f47-44c5-8cbd-e81bc96492bb" alt="..." width="500" />
 
 ### Explain the conventions
 #### Store conventions
@@ -23,6 +23,7 @@ For excample:
 The "product_id" consists of 9 characters and contains encrypted information about the product. This information can be deciphered to extract additional details about the product, such as the "Product group," "Product line," "Product number," and "Size.”
 
 ![product id](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/0f1d4018-7508-498f-865f-f4aa26553e6c)
+<img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/0f1d4018-7508-498f-865f-f4aa26553e6c" alt="..." width="500" />
 
 - Product Rroup: denoted by the first 2 numbers of product_id. For example: 40 - Office wear Product group.
 - Product line: The third character in “product_id” represents the product line. In this dataset, there are 2 product lines: women's clothes corresponding to the letter W and men's clothes corresponding to the letter M.
