@@ -69,15 +69,15 @@ import matplotlib.pyplot as plt
 import math
 
 #2 Import Inventory data and Sales data
-##Inventory data
+# Inventory data
 inventory_data = pd.read_excel(r"inventory.xlsx")
-##Sales data
+# Sales data
 sales_data = pd.read_excel(r"sales.xlsx")
 
 
 #3 Declare stores's 3 letter code in lists
-## Declare stores sell the main product line - women fashion
+# Declare stores sell the main product line - women fashion
 stores = ['BGI', 'DNA', 'DNG', 'GLA', 'HCM', 'HNO', 'HYE', 'LAN', 'QNA', 'QNH', 'TBH', 'THA', 'TNG', 'VPH', 'VTB']
-##Declare stores sell secondary product line - men fashion
+# Declare stores sell secondary product line - men fashion
 men_stores = ['BGI', 'DNG', 'GLA', 'HCM', 'HNO', 'LAN', 'THA', 'TNG', 'VPH', 'VTB']
 ```
