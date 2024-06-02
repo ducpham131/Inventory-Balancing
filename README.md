@@ -10,7 +10,7 @@ For fashion items, having a variety of product sizes is crucial to accommodate t
 Based on the inventory data of the stores in the system, I was tasked with creating transfer orders to balance the products across the stores. The objective of this activity is to leverage the available sizes in stock at certain stores to fill size gaps in others. Additionally, the aim is to gather products with low and sparse inventory from various stores to the best-selling stores. This ensures there are enough items on display shelves and increases the likelihood of selling out by the end of season.
 This task consumes a lot of time and operations when done on spreadsheets when dealing with large amounts of data. So I replaced the spreadsheet with Python to save time and improve performance.
 ## Datasets
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/718ac802-254c-4789-ad12-a0881c781f94/a09e6675-21f9-47e7-b2fd-73b832668775/Untitled.png)
+![data](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/70f63071-4f47-44c5-8cbd-e81bc96492bb)
 ### Explain the conventions
 #### Store conventions
 Stores in the dataset are represented as 3-character codes of cities/provinces.
