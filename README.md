@@ -30,9 +30,19 @@ The "product_id" consists of 9 characters and contains encrypted information abo
 - Size: The last 2 characters represent the size of the product. There are 5 sizes “Small”, “Medium”, “Large”, “X-Large”, “XX-Large” in the order of “S1”, “S2”, “S3”, “S4”, “S5”. For example: S1 - Small size
 ### Table 1: sales
 The sales table contains information about the stores' orders for 6 months, each line records 1 product sold.
+|store|order_time|order_id|customer_name|product_id|quantity|
+|QNH|1/1/23 9:02|QNH01342|N N P N|35W7885S5|1|
+|HYE|1/1/23 9:57|HYE01588|C T B V|33W6741S4|1|
+|DNA|1/1/23 10:13|DNA02155|M T|35W3595S3|1|
+|HNO|1/1/23 10:53|HNO01122|M M|22M5734S4|1|
+|VTB|1/1/23 11:05|VTB01351|M H|20M5070S3|1|
+|TBH|1/1/23|11:06|TBH01087|L A T|35W3595S1|1|
 <img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/565c8cd4-e782-4983-9468-fac0a39b81da" alt="..." width="500" />
 ### Table 2: inventory
 The inventory table provides information about the inventory status of stores within the system.
 Columns BGI to VTB represent the inventory levels at stores, each identified by its corresponding 3-letter code.
 Additionally, it's important to note that some stores only sell women's clothing and do not carry men's clothing. Therefore, caution is needed when transfering to avoid any misleading. Stores that exclusively sell women's clothing and do not carry men's clothing include: DNA, HYE, QNA, QNH, and TBH.
 <img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/1cab6008-beae-47a1-8fa2-0fe76131f21c" alt="..." width="800" />
+# Implementation steps
+## Step 1: Prepare
+The first step I took was to import the necessary libraries, import data from the "inventory" and "sales" tables, and declare the stores in lists.
