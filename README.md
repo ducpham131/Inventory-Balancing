@@ -4,7 +4,7 @@ In this project, I use Python to coordinate inventory at stores within the syste
 ## Business context
 The data used pertains to fashion items at a retailer with distribution stores across the country. Products are distributed to these stores for storage, display, and sales.
 For fashion items, having a variety of product sizes is crucial to accommodate the diverse needs of customers. The absence of sizes within the same product can potentially hinder product sales, as customers may struggle to find the right size. Therefore, ensuring that stores have adequate stock of products in various sizes is essential to facilitate faster sales, particularly towards the end of the season.
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/718ac802-254c-4789-ad12-a0881c781f94/02ac375c-1db2-49d8-93a3-e8edfb416189/Untitled.png)
+![alt](https://drive.google.com/file/d/106Ft4wzPteWeeBbKdE5aIIfDopy6eLay/view?usp=sharing)
 Based on the inventory data of the stores in the system, I was tasked with creating transfer orders to balance the products across the stores. The objective of this activity is to leverage the available sizes in stock at certain stores to fill size gaps in others. Additionally, the aim is to gather products with low and sparse inventory from various stores to the best-selling stores. This ensures there are enough items on display shelves and increases the likelihood of selling out by the end of season.
 This task consumes a lot of time and operations when done on spreadsheets when dealing with large amounts of data. So I replaced the spreadsheet with Python to save time and improve performance.
 ## Datasets
