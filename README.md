@@ -58,8 +58,8 @@ Additionally, it's important to note that some stores only sell women's clothing
 |20W4085S1|Shorts|125|10|8|8|5|4|7|11|9|9|10|6|8|10|10|10|
 |10M5041S2|Short-sleeve shirt|117|8|0|16|15|10|12|0|7|0|0|0|7|15|11|16|
 |11W8979S1|Long-sleeve shirt|117|11|7|9|5|12|6|4|9|3|10|15|6|6|4|10|
-# Implementation steps
-## Step 1: Prepare
+## Implementation steps
+### Step 1: Prepare
 The first step I took was to import the necessary libraries, import data from the "inventory" and "sales" tables, and declare the stores in lists.
 ```c
 //1 Import libraries
@@ -81,7 +81,7 @@ stores = ['BGI', 'DNA', 'DNG', 'GLA', 'HCM', 'HNO', 'HYE', 'LAN', 'QNA', 'QNH', 
 // Declare stores sell secondary product line - men fashion
 men_stores = ['BGI', 'DNG', 'GLA', 'HCM', 'HNO', 'LAN', 'THA', 'TNG', 'VPH', 'VTB']
 ```
-## Step 2: Process inventory data
+### Step 2: Process inventory data
 First, I create “product_code”, “size”, “product_group”, “product_line” columns from “product_id”
 ```c
 //Extract 'product_code', 'size', 'product_line' and 'product_group' from 'product_id'
@@ -101,7 +101,7 @@ plt.ylabel('Total Inventory')
 plt.show()
 ```
 ![size plot](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/e4b70e32-1da6-4dcb-87d5-2e35c89cdcaf)
-## Step 3: Process sales data
+### Step 3: Process sales data
 Similar to the inventory table above, I also created the columns “product_code”, “size”, “product_group”, “product_line” from “product_id”.
 ```c
 // Extract 'product_code', 'size', 'product_line' and 'product_group' from 'product_id'
