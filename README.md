@@ -70,7 +70,7 @@ import math
 inventory_data = pd.read_excel(r"inventory.xlsx")
 sales_data = pd.read_excel(r"sales.xlsx")
 
-
+--Declare 
 stores = ['BGI', 'DNA', 'DNG', 'GLA', 'HCM', 'HNO', 'HYE', 'LAN', 'QNA', 'QNH', 'TBH', 'THA', 'TNG', 'VPH', 'VTB']
 men_stores = ['BGI', 'DNG', 'GLA', 'HCM', 'HNO', 'LAN', 'THA', 'TNG', 'VPH', 'VTB']
 ```
