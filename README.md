@@ -1,1 +1,2 @@
-# Inventory-Balancing
+# Inventory Balancing
+## Introduction
