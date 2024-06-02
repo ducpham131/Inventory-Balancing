@@ -35,4 +35,4 @@ The sales table contains information about the stores' orders for 6 months, each
 The inventory table provides information about the inventory status of stores within the system.
 Columns BGI to VTB represent the inventory levels at stores, each identified by its corresponding 3-letter code.
 Additionally, it's important to note that some stores only sell women's clothing and do not carry men's clothing. Therefore, caution is needed when transfering to avoid any misleading. Stores that exclusively sell women's clothing and do not carry men's clothing include: DNA, HYE, QNA, QNH, and TBH.
-<img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/1cab6008-beae-47a1-8fa2-0fe76131f21c" alt="..." width="500" />
+<img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/1cab6008-beae-47a1-8fa2-0fe76131f21c" alt="..." width="800" />
