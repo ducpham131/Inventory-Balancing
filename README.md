@@ -31,6 +31,7 @@ The "product_id" consists of 9 characters and contains encrypted information abo
 ### Table 1: sales
 The sales table contains information about the stores' orders for 6 months, each line records 1 product sold.
 |store|order_time|order_id|customer_name|product_id|quantity|
+|:----|:--------:|:------:|:-----------:|:--------:|-------:|
 |QNH|1/1/23 9:02|QNH01342|N N P N|35W7885S5|1|
 |HYE|1/1/23 9:57|HYE01588|C T B V|33W6741S4|1|
 |DNA|1/1/23 10:13|DNA02155|M T|35W3595S3|1|
