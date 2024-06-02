@@ -18,9 +18,7 @@ For excample:
 #### product_id conventions
 The "product_id" consists of 9 characters and contains encrypted information about the product. This information can be deciphered to extract additional details about the product, such as the "Product group," "Product line," "Product number," and "Size.”
 ![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/718ac802-254c-4789-ad12-a0881c781f94/32da113a-199b-46b7-b9e1-37c06b208926/Untitled.png)
-- Product Rroup: denoted by the first 2 numbers of product_id
-  For example: 40 - Office wear Product group.
+- Product Rroup: denoted by the first 2 numbers of product_id. For example: 40 - Office wear Product group.
 - Product line: The third character in “product_id” represents the product line. In this dataset, there are 2 product lines: women's clothes corresponding to the letter W and men's clothes corresponding to the letter M.
 - Product number: The next 4 digits are the product code used to distinguish products in the same group.
-- Size: The last 2 characters represent the size of the product. There are 5 sizes “Small”, “Medium”, “Large”, “X-Large”, “XX-Large” in the order of “S1”, “S2”, “S3”, “S4”, “S5”.
-  For example: S1 - size S
+- Size: The last 2 characters represent the size of the product. There are 5 sizes “Small”, “Medium”, “Large”, “X-Large”, “XX-Large” in the order of “S1”, “S2”, “S3”, “S4”, “S5”. For example: S1 - size S
