@@ -22,7 +22,6 @@ For excample:
 #### product_id conventions
 The "product_id" consists of 9 characters and contains encrypted information about the product. This information can be deciphered to extract additional details about the product, such as the "Product group," "Product line," "Product number," and "Size.”
 
-![product id](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/0f1d4018-7508-498f-865f-f4aa26553e6c)
 <img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/0f1d4018-7508-498f-865f-f4aa26553e6c" alt="..." width="500" />
 
 - Product Rroup: denoted by the first 2 numbers of product_id. For example: 40 - Office wear Product group.
