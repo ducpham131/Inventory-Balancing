@@ -68,7 +68,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import math
 
--2 Import Inventory data and Sales data
+-/2 Import Inventory data and Sales data
 --- Inventory data
 inventory_data = pd.read_excel(r"inventory.xlsx")
 --- Sales data
