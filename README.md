@@ -81,3 +81,23 @@ stores = ['BGI', 'DNA', 'DNG', 'GLA', 'HCM', 'HNO', 'HYE', 'LAN', 'QNA', 'QNH', 
 // Declare stores sell secondary product line - men fashion
 men_stores = ['BGI', 'DNG', 'GLA', 'HCM', 'HNO', 'LAN', 'THA', 'TNG', 'VPH', 'VTB']
 ```
+## Step 2: Process inventory data
+First, I create “product_code”, “size”, “product_group”, “product_line” columns from “product_id”
+```c
+//Extract 'product_code', 'size', 'product_line' and 'product_group' from 'product_id'
+inventory_data['product_code'] = inventory_data['product_id'].str[0:7]
+inventory_data['size'] = inventory_data['product_id'].str[8:9]
+inventory_data['product_line'] = inventory_data['product_id'].str[2:3]
+inventory_data['product_group'] = inventory_data['product_id'].str[0:2]
+```
+To provide a quick review, I draw a column chart to show the “Total Inventory by Sizes”. The three sizes “Small”, “Medium”, and “Large” have the highest inventory, while the sizes “X-large” and “XX-large” have relatively limited inventory compared to the other sizes. This is appropriate because the demand for the first three sizes always accounts for a higher proportion than the "extra" sizes.
+```c
+size_inventory = inventory_data.groupby('size').agg({'total_inventory':sum}).reset_index()
+plt.bar(size_inventory['size'], size_inventory['total_inventory'],
+color=['skyblue','gold', 'lightgreen', 'coral', 'salmon'])
+plt.title('Total Inventory by Sizes')
+plt.xlabel('Sizes')
+plt.ylabel('Total Inventory')
+plt.show()
+```
+![size plot](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/e4b70e32-1da6-4dcb-87d5-2e35c89cdcaf)
