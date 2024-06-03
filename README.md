@@ -311,7 +311,7 @@ product_inventory['top_5_distribution'] = product_inventory.apply(lambda row: {r
 ### Step 12: Create Stock Level Data Frame 
 We have all the necessary information: the ideal stock quantity of each size for each product, the list of stores that need to be distributed, and distribution methods (gather or balance). Let's synthesize them all into a unified Data Frame.
 
-First, I converted `inventory_data` to Long format, with each record representing each store's inventory. Similarly, I also created the Data Frames `ideal_stock` and `stores_distribution` by converting `product_inventory` to Long format. Now, both Data Frames contain a `value` column with dictionaries. I separated the keys and values of the dictionaries to create corresponding columns. Next, I copied the two columns `product_code` and `decision` from **`product_inventory`** to create a new Data Frame called **`product_type`**. Finally, I merged them all into a unified Data Frame called **`stock_level`**.
+First, I converted **`inventory_data`*** to Long format, with each record representing each store's inventory. Similarly, I also created the Data Frames **`ideal_stock`** and **`stores_distribution`** by converting **`product_inventory`** to Long format. Now, both Data Frames contain a `value` column with dictionaries. I separated the keys and values of the dictionaries to create corresponding columns. Next, I copied the two columns `product_code` and `decision` from **`product_inventory`** to create a new Data Frame called **`product_type`**. Finally, I merged them all into a unified Data Frame called **`stock_level`**.
 
 Now we have a Data Frame containing information about the stores's inventory, the ideal stock levels, the distribution list, and the distribution method.
 ```c
@@ -344,3 +344,252 @@ stock_level = inventory_melt.merge(
                                 stores_distribution, on = ['product_code','size'], how = 'left').merge(
                                 product_type, on = 'product_code', how = 'left')
 ```
+### Step 13: Create Sending Data Frame
+In this step, I create a Data Frame containing products that can be sent to other stores. I apply the following conditions to filter from the **`stock_level`** Data Frame:
+
+- When the store is not on the distribution list and has a stock level greater than 0.
+- When the store is on the distribution list and the inventory is greater than the ideal stock level.
+
+After creating the Data Frame, I calculate the number of products that could be sent.
+
+- For balance-products: If the store is on the distribution list, the quantity transferred will be the excess quantity compared to the ideal inventory level. If the store is not on the distribution list, keep 1 product so the store still has the opportunity to sell.
+- For gather-products: If the store is on the distribution list, the quantity transferred will be the excess quantity compared to the ideal inventory level. If the store is not on the distribution list, transfer all inventory.
+```c
+// 1 Create DataFrame contains transferable products in stores
+send_stores_list = []
+
+for index, row in stock_level.iterrows():
+    if row['store'] not in row['stores_distribution'] and row['stock'] > 0 :
+        send_stores_list.append(row)
+    elif row['store'] in row['stores_distribution'] and row['stock'] > row['ideal_stock']:
+        send_stores_list.append(row)
+
+send_stores = pd.DataFrame(send_stores_list)
+
+
+// 2 Create "Sending quantity" column
+send_quantity = []
+
+for index, row in send_stores.iterrows():
+    if row['decision'] == 'balance':
+        if row['store'] in row['stores_distribution']:
+            send_quantity.append(row['stock'] - row['ideal_stock'])
+        else:
+             send_quantity.append(row['stock'] - 1)
+    else:
+        if row['store'] in row['stores_distribution']:
+            send_quantity.append(row['stock'] - row['ideal_stock'])
+        else:
+            send_quantity.append(row['stock'])
+
+send_stores['send_quantity'] = send_quantity
+send_stores = send_stores[send_stores['send_quantity'] != 0]
+send_stores = send_stores.reset_index(drop = True)
+print(send_stores)
+```
+### Step 14: Create Receiving Data Frame
+Similar to the above step, I create a Data Frame containing missing products that need to be replenished in stores. I apply the following condition to filter from the **`stock_level`** Data Frame:
+
+- When the store is on the distribution list and has inventory lower than the ideal inventory level.
+
+Then, I create a column to calculate the amount of stock that can be received.
+```c
+// 1 Apply filter
+receive_stores = stock_level[(stock_level.apply(lambda row: row['store'] in row['stores_distribution'], axis = 1))
+                            & (stock_level['stock']< stock_level['ideal_stock'])].reset_index(drop = True)
+
+// 2 Calculate "Receiving quantity"
+receive_stores['receive_quantity'] = receive_stores['ideal_stock'] - receive_stores['stock']
+print(receive_stores)
+```
+### Step 15: Split Sending and Receiving Data Frame by stores
+I separate the sending and receiving Data Frames into individuals Data Frame by stores. 
+```c
+// 1 Sending Data Frame
+for store in send_stores['store'].unique():
+    globals()[f'{store}_send'] = send_stores[send_stores['store'] == store].copy().reset_index(drop=True)
+
+
+// 2 Receiving Data Frame
+for store in receive_stores['store'].unique():
+    globals()[f'{store}_receive'] = receive_stores[receive_stores['store'] == store].copy().reset_index(drop=True)
+```
+### Step 16: Write functions to transfer products between stores 
+In this step, I write functions to help quickly create transfer orders between stores.
+
+First, I write the function ***transfer_raw***. This function allows me to create a Data Frame that merges all records from the Sending Store and Receiving tore and calculates the transfer quantity of each size for each Product Code. While calculating the transfer quantity, to improve efficiency when gathering in stores, I assume that the Receiving stores can hold 3 units more than the ideal inventory quantity of the gather-products from stores not in the distribution list. Because most of the gather-products are at stores that are not on the list and have inventory levels of 1 or 2 products (based on the plot below). This ensures that gather products can be quickly gathered to stores after each transfer.
+
+![histogram](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/05b09cd5-e651-458c-8414-2791466b898a)
+
+```c
+// Fucntion to create a raw "Sending - Receiving" DataFrame 
+def transfer_raw(send_store, receive_store):
+    df = send_store.merge(receive_store, on =['product_code','size','ideal_stock','stores_distribution','decision']
+                            , how = 'outer', suffixes = ['_send','_receive']).fillna(0)
+    
+    transfer_quantity = []
+    
+    for index, row in df.iterrows():
+        if row['store_send'] != 0 and row['store_receive'] != 0:
+            if row['decision'] == 'gather' and row['store_send'] not in row['stores_distribution']:
+                ## Receiving store could store 3 units greater than ideal stock quantity
+                if row['send_quantity'] <= row['receive_quantity'] + 3:
+                    transfer_quantity.append(row['send_quantity'])
+                else:
+                    transfer_quantity.append(row['receive_quantity'] + 3)
+            else:
+                if row['send_quantity'] <= row['receive_quantity']:
+                    transfer_quantity.append(row['send_quantity'])
+                else:
+                    transfer_quantity.append(row['receive_quantity'])
+        else:
+            transfer_quantity.append(0)
+    
+    df['transfer_quantity'] = transfer_quantity
+    df['send_stock_after_transfer'] = df['send_quantity'] - df['transfer_quantity']
+    df['receive_stock_after_transfer'] = df['receive_quantity'] - df['transfer_quantity']
+    
+    return df
+```
+Next, I write the function ***transfer*** to process the DataFrame from the function ***transfer_raw***. It help removing unnecessary columns and “0” values to create a complete transfer order.
+```c
+// 2 Function to create a "Seding - Receiving" DataFrame
+def transfer(send_store, receive_store):
+    df_raw = transfer_raw(send_store, receive_store)
+    
+    df = df_raw[df_raw['transfer_quantity'] > 0]
+    df = df[['product_code','size','store_send','store_receive','transfer_quantity']]
+    
+    return df
+```
+Because sending and receiving Data Frames can still continue to participate in transfers with other stores, I continue writing the functions ***after_send*** and ***after_receive*** to recalculate the remaining number of products that can be sent and received, and to delete products that cannot be further transferred or have received enough products.
+```c
+// 3 Function to process "Sending Store" after transfering
+def after_send(send_store, receive_store):
+    df_raw = transfer_raw(send_store, receive_store)
+    
+    df = df_raw[(df_raw['store_send'] != 0) & (df_raw['send_stock_after_transfer'] > 0)]
+    df = df[['product_code','size','store_send','send_stock_after_transfer',
+             'ideal_stock','stores_distribution','decision']]
+    df = df.rename(columns = {'store_send':'store','send_stock_after_transfer':'send_quantity'})
+    
+    return df
+
+
+// 4 Function to process "Receiving Store" after transfering
+def after_receive(send_store, receive_store):
+    df_raw = transfer_raw(send_store, receive_store)
+    
+    df = df_raw[(df_raw['store_receive'] != 0) & (df_raw['receive_stock_after_transfer'] > 0)]
+    df = df[['product_code','size','store_receive','receive_stock_after_transfer',
+             'ideal_stock','stores_distribution','decision']]
+    df = df.rename( columns = {'store_receive':'store','receive_stock_after_transfer':'receive_quantity'})
+    
+    return df
+```
+Finally, to quickly check the transfer results, I write the function ***result*** to calculate the total number of transferred products.
+```c
+#5 Function to quickly check the result
+def result(send_store, receive_store):
+    df = transfer(send_store, receive_store)
+    
+    x = sum(df['transfer_quantity'])
+    
+    return print(x)
+```
+### Step 17: Draw plots
+Now we have enough tools to transfer products between stores. However, it is difficult to decide which stores to transfer products to, how many products to transfer, and the priority order of stores for distribution. Because the source of transferable products and the resources used to move goods are limited, priority should be given to filling stores with good sales performance within the system. To solve this problem, I use plots to quickly make decisions about moving products between stores.
+
+I use a heatmap to represent the transfer quantities between stores. In this plot, I can quickly decide which transfer pairs will be optimal based on the total quantity for each transfer. 
+>For example, for the receiving store DNA, I can choose the HCM or VTB store to transfer goods from, instead of other stores with lower efficiency. Additionally, I can identify stores that have a large number of transferable products, which means these stores are holding more inventory than others.
+```c
+send_receive = transfer(send_stores, receive_stores)
+
+heatmap_matrix = send_receive.pivot_table(index = 'store_send', columns = 'store_receive', 
+                                           values = 'transfer_quantity', aggfunc = 'sum')
+
+plt.figure(figsize=(15, 12))
+sns.heatmap(heatmap_matrix, annot=True, cmap='YlGnBu', fmt='g', linewidths=.5, cbar_kws={'label': 'Transfer Quantity'})
+
+plt.yticks(rotation=0)
+plt.xticks(rotation=0)
+plt.title('Transfer Quantity between Stores')
+plt.xlabel('Receiving Stores')
+plt.ylabel('Sending Stores')
+
+plt.show()
+```
+![heatmap](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/5003d67f-6392-469a-988b-ab5023fac955)
+
+Next, I use a scatter plot to represent the relationship between revenue and inventory quantity of each store. I can observe which store is performing the best in sales, which store needs to be restocked, and which store is holding too much inventory compared to its sales capacity.
+> For example, the DNA store has the best sales but a low inventory level, so it should be prioritized for restocking. Conversely, the VTB and HCM stores have average sales but are holding nearly double the inventory compared to other stores in the same segment, so their excess inventory should be redistributed to optimize resources.
+```c
+inventory_group = inventory_melt.groupby(by = 'store').agg({'stock':'sum'}).reset_index()
+sales_group = sales_data.groupby(by = 'store').agg({'quantity':'sum'}).reset_index()
+sales_and_inventory = inventory_group.merge(sales_group, on = 'store', how = 'left')
+
+// Define colors for each store group
+stores_sale_women_only = [ x for x in stores if x not in men_stores]
+stores_sale_women_and_men = [ x for x in stores if x in men_stores]
+
+colors = []
+for store in sales_and_inventory['store']:
+    if store in stores_sale_women_only:
+        colors.append('blue')
+    elif store in stores_sale_women_and_men:
+        colors.append('green')
+
+plt.figure(figsize=(10, 6))
+plt.scatter(sales_and_inventory['stock'], sales_and_inventory['quantity'], c=colors, alpha=0.7)
+
+plt.ylabel('Sales')
+plt.xlabel('Stock Level')
+plt.title('Sales vs Stock Level by Stores')
+
+// Add annotations for each data point
+for i, txt in enumerate(sales_and_inventory['store']):
+    plt.annotate(txt, (sales_and_inventory['stock'].iloc[i], sales_and_inventory['quantity'].iloc[i]), 
+                 textcoords="offset points", xytext=(0,5), ha='center')
+
+// Create legend labels
+legend_labels = {
+    'Store sales Women clothes': 'blue',
+    'Store sles Women and Men clothes': 'green',
+    }
+
+handles = [plt.Line2D([], [], marker='o', markersize=10, color=color, linestyle='None', label=label) 
+           for label, color in legend_labels.items()]
+plt.legend(handles=handles)
+
+plt.show()
+```
+![scatter](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/453dd0a6-266a-4ea1-a67b-91ff493a975b)
+### Step 18: Perform transfering
+In this step, I pair the stores to create Data Frames for sending and receiving. By using the functions above, I can quickly perform the transfer. Here is an example of how I work:
+```c
+// Compairing example:
+TBH_HYE = transfer(TBH_send, HYE_receive)
+TBH_send_1 = after_send(TBH_send, HYE_receive)
+HYE_receive_1 = after_receive(TBH_send, HYE_receive)
+result(TBH_send, HYE_receive)
+```
+Use the ***transfer*** function to create a transfer DataFrame. I name the transferred DataFrame according to the structure "SendingStore_ReceivingStore".
+
+I reprocess the sent and received DataFrames using the functions ***after_send*** and ***after_receive***. I number them to distinguish them from the original DataFrames.
+
+The ***result*** function helps me quickly check the number of transfers. If the number of transfers is reasonable, I save the DataFrames and repeat the process with other pairs of stores.
+### Step 19: Create “Tranfering Order”
+After completing the pairing of the stores, I synthesize the sending and receiving Data Frames into a unified Data Frame.
+
+Finally, I will export the results into an Excel file containing the transfer order and send it to the stores to carry out the transfer.
+```c
+// Concatenate the send-receive DataFrames into a unified DataFrame
+transfer_table = pd.DataFrame()
+for send_store in stores:
+    for receive_store in stores:
+        if send_store != receive_store:
+            name = f"{send_store}_{receive_store}"
+            if name in locals():
+                transfer_table = pd.concat([transfer_table, locals()[name]], ignore_index=True)
+// Export result                
+transfer_table.to_excel('Transfer Order.xlsx', index = None)
