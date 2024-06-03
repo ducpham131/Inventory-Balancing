@@ -120,3 +120,45 @@ inventory_code = inventory_data[['product_code','product_line','product_group']]
 inventory_sales = inventory_code.merge(sales, on = ['product_code','product_line','product_group'], 
                                        how ='left').fillna(0)
 ```
+### Step 5: Rank stores by their sales quantity
+In this step, I sorted the stores by decreasing sales volume for each Product Code. My idea is to use these sorted lists to allocate the *Product Code* to the stores that are most likely to sell.
+
+However, in some cases where stores have the same sales quantity or 0 sales quantity, the arrangement of stores will default to alphabetical order based on the first character of the store code. This could cause an imbalance and may not be accurate, as stores with codes that begin with letters later in the alphabet will be pushed to the end of the sorted list.
+
+To solve this problem, I use an additional criterion, which is based on the sales quantity of each *Product Group*, to refine the sorting conditions. The heatmap graph below shows the sales volume of stores for each Product Group. For example, the QNH store sells well in Product Group 31 - Knit dress, as indicated by the darker colors, whereas the GLA store, which appears earlier alphabetically, has lower sales for this group. Adding this filter makes the sorting more accurate because it is based on the stores' ability to sell according to each "Product Group" rather than alphabetical order.
+![Sale product group](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/6584bfb1-c44c-4901-b6f7-7390bdf10084)
+
+Going back to how I arranged the stores. First, as mentioned, I create an ordered list of stores according to the *Product Group* using the `product_group_sales` table. This ensures that stores are prioritized based on their sales performance for each specific product group.
+```c
+// Rank stores by their sales of each "product_group"
+product_group_sales['stores_sort_by_sales_group'] = product_group_sales[stores].apply(lambda row: row.nlargest(len(stores)).index.to_list(), axis=1)
+product_group_sales['stores_sort_by_sales_group'] = product_group_sales['stores_sort_by_sales_group'].apply(tuple)
+stores_sort_by_product_group = product_group_sales[['product_group','stores_sort_by_sales_group']]
+print(stores_sort_by_product_group)
+```
+Next, I create the `stores_rank` Data Frame by merging the `inventory_sales` and `product_group_sales`. Now, we have a Data Frame that contains the sales quantity by each product code for the stores, as well as a list of stores sorted by the sales quantity of each *Product Group*.
+
+Finally, I write a function to sort the stores. The stores are sorted in descending order of sales volume. If stores have the same sales volume, the secondary criterion is used, which is the list in the column `stores_sort_by_sales_group`.
+```c
+// Merge "inventory_sales" and "product_group_sales".
+stores_rank = inventory_sales.merge(stores_sort_by_product_group, on = 'product_group', how = 'left')
+
+// Write a function to sort stores by their sales of each "product_code"
+def sort_store(row):
+		 // Sort stores that sell men clothes
+    if row['product_line'] == 'M':
+        sorted_shops = sorted(zip(men_stores, row[men_stores]), 
+                              key=lambda x: (-x[1], row['stores_sort_by_sales_group'].index(x[0]) 
+                                             if x[0] in row['stores_sort_by_sales_group'] else float('inf')
+                                            ))
+    // Sort stores that sell women clothes                                        
+    else:
+        sorted_shops = sorted(zip(stores, row[stores]), 
+                              key=lambda x: (-x[1], row['stores_sort_by_sales_group'].index(x[0]) 
+                                             if x[0] in row['stores_sort_by_sales_group'] else float('inf')
+                                            ))
+    return [shop[0] for shop in sorted_shops]
+
+stores_rank['stores_rank'] = stores_rank.apply(lambda row: sort_store(row), axis = 1).apply(tuple)
+stores_rank = stores_rank[['product_code','stores_rank']]
+```
