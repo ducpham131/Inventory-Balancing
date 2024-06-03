@@ -61,7 +61,7 @@ Additionally, it's important to note that some stores only sell women's clothing
 ### Step 1: Prepare
 The first step I took was to import the necessary libraries, import data from the **inventory** and **sales** tables, and declare the stores in lists.
 ```c
-\1 Import libraries\
+/1 Import libraries/
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
