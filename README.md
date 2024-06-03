@@ -61,20 +61,18 @@ Additionally, it's important to note that some stores only sell women's clothing
 ### Step 1: Prepare
 The first step I took was to import the necessary libraries, import data from the **inventory** and **sales** tables, and declare the stores in lists.
 ```c
-/1 Import libraries/
+// 1 Import libraries
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import math
 
-//2 Import Inventory data and Sales data
-// Inventory data
+// 2 Import Inventory data and Sales data
 inventory_data = pd.read_excel(r"inventory.xlsx")
-// Sales data
 sales_data = pd.read_excel(r"sales.xlsx")
 
 
-//3 Declare stores's 3 letter code in lists
+// 3 Declare stores's 3 letter code in lists
 // Stores sell women's clothes
 stores = ['BGI', 'DNA', 'DNG', 'GLA', 'HCM', 'HNO', 'HYE', 'LAN', 'QNA', 'QNH', 'TBH', 'THA', 'TNG', 'VPH', 'VTB']
 // Stores sell men's clothes
