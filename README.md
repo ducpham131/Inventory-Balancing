@@ -218,3 +218,129 @@ for index, row in product_inventory.iterrows():
 // Create 'minimum' column
 product_inventory['minimum'] = minimum
 ```
+### Step 8: Calculate number of stores that are distributed
+In this step, I calculate the number of stores to be distributed using the `total_inventory` and `minimum` columns. For Product Codes with a small total inventory, I will gather them to distribute to a few stores. Additionally, there are 15 stores selling women's clothes and 10 stores selling men's clothes. Therefore, the maximum number of stores allocated according to the product line will be 15 for women's clothes and 10 for men's clothes.
+```c
+# Calculate number of stores that are distributed
+gather_num = []
+
+for index, row in product_inventory.iterrows():
+    if row['total_inventory'] <= 5:
+        gather_num.append(1)
+    elif row['total_inventory'] <= 12:
+        gather_num.append(2)
+    elif row['total_inventory'] <= 20:
+        gather_num.append(3) 
+    elif row['product_line'] == 'M' and row['minimum'] >= len(men_stores):
+        gather_num.append(len(men_stores))
+    elif row['product_line'] == 'W' and row['minimum'] >= len(stores):
+        gather_num.append(len(stores))
+    else:
+        gather_num.append(row['minimum'])
+        
+product_inventory['distribution_num'] = gather_num
+```
+### Step 9: Determine how stocks are distributed
+For *Product Codes* with low inventory and a small number of size run, I will gather these *Product Codes* to the best-selling stores. For *Product Codes* with large inventories, the priority is to balance the inventory by transferring excess products to stores that are lacking.
+```c
+decision = []
+
+for index, row in product_inventory.iterrows():
+    if row['product_line'] == 'M' and row['distribution_num'] <= (len(men_stores) - 5):
+        decision.append('gather')
+    elif row['product_line'] == 'W' and row['distribution_num'] <= (len(stores) -  5):
+        decision.append('gather')
+    else:
+        decision.append('balance')
+        
+product_inventory['decision'] = decision
+```
+### Step 10: Calculate the ideal stock quantity in each distributed stores
+Based on the `distribution_num` column and stock quantity in each size, I write a function to calculate the ideal stock quantity by size in each store. The outcome will be columns containing dictionaries with the size as the key and the stock quantity that should be stored as the value.
+```c
+// Write function
+def ideal_num(row, n):
+    n = int(n)
+    if row == 0:
+        num = 0
+    else:
+        if math.floor(row/n) == 0:
+            num = 1
+        else:
+            num = math.floor(row/n)
+        
+    return num
+
+// Apply function to Data Frame
+product_inventory['ideal_1st_size'] = product_inventory.apply(lambda row:{row['1st_size']:ideal_num(row['1st_stock'],row['distribution_num'])}, axis =1)
+product_inventory['ideal_2nd_size'] = product_inventory.apply(lambda row:{row['2nd_size']:ideal_num(row['2nd_stock'],row['distribution_num'])}, axis =1)
+product_inventory['ideal_3rd_size'] = product_inventory.apply(lambda row:{row['3rd_size']:ideal_num(row['3rd_stock'],row['distribution_num'])}, axis =1)
+product_inventory['ideal_4th_size'] = product_inventory.apply(lambda row:{row['4th_size']:ideal_num(row['4th_stock'],row['distribution_num'])}, axis =1)
+product_inventory['ideal_5th_size'] = product_inventory.apply(lambda row:{row['5th_size']:ideal_num(row['5th_stock'],row['distribution_num'])}, axis =1)
+```
+> For example, `product_inventory` has values below:
+> **`1st_size`**: "1"
+> **`1st_stock`**: 15
+> **`distribution_num`**: 10
+> After executing, it will return a dictionary`{ "1": 1 }` because 15 /10 = 1
+### Step 11: Determine which stores should be distributed
+Based on the `store_rank` and `distribution_num` columns, I write a function to return lists of stores with high sales quantities. This means these stores should be fully stocked. The outcome will be dictionaries with the size as the key and the lists of stores as the value.
+```c
+# Write function
+def get_top_rank(row,n):
+    n = int(n)
+    if isinstance(row, tuple):
+        top = row[:n] if row[0] else []
+    else:
+        top = []
+    return top
+
+
+# Apply function to Data Frame
+product_inventory['top_1_distribution'] = product_inventory.apply(lambda row: {row['1st_size']:get_top_rank(row['stores_rank'],row['distribution_num'])}, axis = 1)
+product_inventory['top_2_distribution'] = product_inventory.apply(lambda row: {row['2nd_size']:get_top_rank(row['stores_rank'],row['distribution_num'])}, axis = 1)
+product_inventory['top_3_distribution'] = product_inventory.apply(lambda row: {row['3rd_size']:get_top_rank(row['stores_rank'],row['distribution_num'])}, axis = 1)
+product_inventory['top_4_distribution'] = product_inventory.apply(lambda row: {row['4th_size']:get_top_rank(row['stores_rank'],row['4th_stock'])}, axis = 1)
+product_inventory['top_5_distribution'] = product_inventory.apply(lambda row: {row['5th_size']:get_top_rank(row['stores_rank'],row['5th_stock'])}, axis = 1)
+```
+> For example, `product_inventory` has values below:
+> `1st_size`: "1"
+> `store_rank`:  (DNG, BGI, LAN, TNG, THA, VPH, HCM, VTB, GLA)
+> `distribution_num`: 4
+> After executing, it will return a dictionary `{ "1":("DNG", "BGI", "LAN", "TNG",)}`
+### Step 12: Create Stock Level Data Frame 
+We have all the necessary information: the ideal stock quantity of each size for each product, the list of stores that need to be distributed, and distribution methods (gather or balance). Let's synthesize them all into a unified Data Frame.
+
+First, I converted `inventory_data` to Long format, with each record representing each store's inventory. Similarly, I also created the Data Frames `ideal_stock` and `stores_distribution` by converting `product_inventory` to Long format. Now, both Data Frames contain a `value` column with dictionaries. I separated the keys and values of the dictionaries to create corresponding columns. Next, I copied the two columns `product_code` and `decision` from **`product_inventory`** to create a new Data Frame called **`product_type`**. Finally, I merged them all into a unified Data Frame called **`stock_level`**.
+
+Now we have a Data Frame containing information about the stores's inventory, the ideal stock levels, the distribution list, and the distribution method.
+```c
+// 1 Convert "inventory_data" to Long data
+inventory_melt = inventory_data.melt(id_vars = ['product_code','size'], value_vars = stores, var_name = 'store',value_name = 'stock')
+
+// 2 From "product_inventory", extract "Ideal stock quantity" information
+ideal_stock = product_inventory.melt(id_vars = 'product_code', value_vars = ['ideal_1st_size','ideal_2nd_size','ideal_3rd_size','ideal_4th_size','ideal_5th_size'])
+// Extract "size" and "ideal stock" from dictionaries
+ideal_stock['size'] = ideal_stock['value'].apply(lambda x: next(iter(x.keys())))
+ideal_stock['ideal_stock'] = ideal_stock['value'].apply(lambda x: next(iter(x.values())))
+ideal_stock = ideal_stock[['product_code','size','ideal_stock']]
+
+// 3 From "product_inventory", extract "Store distribution" information
+stores_distribution = product_inventory.melt(id_vars = 'product_code', value_vars = ['top_1_distribution','top_2_distribution','top_3_distribution',
+                                                           'top_4_distribution','top_5_distribution'])
+// Extract "size" and "stores distribution list" from dictionaries
+stores_distribution['size'] = stores_distribution['value'].apply(lambda x: next(iter(x.keys())))
+stores_distribution['stores_distribution'] = stores_distribution['value'].apply(lambda x: next(iter(x.values())))
+stores_distribution = stores_distribution[['product_code','size','stores_distribution']]
+
+
+// 4 From "product_inventory", create "product_type" DataFrame
+product_type = product_inventory[['product_code','decision']]
+
+                                     
+// 5 Merge "inventory_melt", "ideal_stock", "stores_distribution" and "product_type"
+stock_level = inventory_melt.merge(
+                                ideal_stock, on = ['product_code','size'], how = 'left').merge(
+                                stores_distribution, on = ['product_code','size'], how = 'left').merge(
+                                product_type, on = 'product_code', how = 'left')
+```
