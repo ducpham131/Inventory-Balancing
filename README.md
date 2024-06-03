@@ -145,7 +145,7 @@ stores_rank = inventory_sales.merge(stores_sort_by_product_group, on = 'product_
 
 // Write a function to sort stores by their sales of each "product_code"
 def sort_store(row):
-		 // Sort stores that sell men clothes
+    // Sort stores that sell men clothes
     if row['product_line'] == 'M':
         sorted_shops = sorted(zip(men_stores, row[men_stores]), 
                               key=lambda x: (-x[1], row['stores_sort_by_sales_group'].index(x[0]) 
@@ -161,4 +161,60 @@ def sort_store(row):
 
 stores_rank['stores_rank'] = stores_rank.apply(lambda row: sort_store(row), axis = 1).apply(tuple)
 stores_rank = stores_rank[['product_code','stores_rank']]
+```
+### Step 6: Create Data Frame for calculations
+First, I create the `size_of_product` Data Frame by using a pivot table to convert `inventory_data` to a wide format. The newly created columns will represent the inventory of each size for each *Product Code*.
+
+Next, I combine `size_of_product` and `stores_rank` to create the `product_inventory` Data Frame for further calculations. I added an additional column, `total_inventory`, to calculate the total inventory for each product code. Now, we have a Data  containing inventory information for each size and a list of distribution priorities according to the *Product Code* for the stores.
+
+Finally, I create additional columns to show information from the highest to the lowest inventory and the sizes with the highest to the lowest inventory. I will use these columns in the following calculation steps.
+```c
+// 1 Convert "inventory_data" to Wide data by "size"
+size_of_product = inventory_data.pivot_table(index=['product_code','product_line','product_group'], 
+                                             columns='size', values='total_inventory', fill_value=0, 
+                                             aggfunc = 'sum').reset_index()
+size_of_product['total_inventory'] = size_of_product[['1','2','3','4','5']].sum(axis = 1)
+
+// 2 Create "product_inventory" by merging "size_of_product" and "stores_rank"
+product_inventory = size_of_product.merge(stores_rank, on = 'product_code', how = 'left')
+
+
+// 3 Create new columns
+// Create columns return stock quantity by ranking stock quantity
+product_inventory['1st_stock'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.max(), axis=1)
+product_inventory['2nd_stock'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.nlargest(2).iloc[-1], axis=1)
+product_inventory['3rd_stock'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.nlargest(3).iloc[-1], axis=1)
+product_inventory['4th_stock'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.nlargest(4).iloc[-1], axis=1)
+product_inventory['5th_stock'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.nlargest(5).iloc[-1], axis=1)
+
+// Create columns return sizes by ranking stock quantity
+product_inventory['1st_size'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.nlargest(1).index[0], axis=1)
+product_inventory['2nd_size'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.nlargest(2).index[1], axis=1)
+product_inventory['3rd_size'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.nlargest(3).index[2], axis=1)
+product_inventory['4th_size'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.nlargest(4).index[3], axis=1)
+product_inventory['5th_size'] = product_inventory[['1','2','3','4','5']].apply(lambda row: row.nlargest(5).index[4], axis=1)
+```
+### Step 7: Calculate minimum size run of each Product Code
+A size run consists of all the sizes a particular product is manufactured in. In this project, I assume a complete size run includes the three sizes with the highest stock quantities. Normally, a size run could be *S-M-L* or *M-L-XL*. However, for some Product Codes, there is a significant difference between the 2nd highest stock quantity and the 3rd highest stock quantity. In that case, I consider the complete size run for these product codes to include just two sizes.
+
+In this step, I create a `minimum` column to calculate the minimum size run of each *Product Code*. This means the value in the `minimum` column represents the minimum complete size run for that *Product Code* in system. I use values in the `3rd_stock` column to calculate the minimum size run. In some specific cases, as mentioned, I consider using values from the `2nd_stock` column or even the `1st_stock` column.
+```c
+// Create a blank list
+minimum = []
+
+// Add values into list
+for index, row in product_inventory.iterrows():
+    if row['3rd_stock'] != 0:
+        if row['2nd_stock']/ row['3rd_stock'] >= 3 or row['2nd_stock'] - row['3rd_stock'] > 15:
+            minimum.append(row['2nd_stock'])
+        else:
+            minimum.append(row['3rd_stock'])
+    elif row['3rd_stock'] == 0:
+        if row['2nd_stock'] != 0 and row['1st_stock']/ row['2nd_stock'] <= 2:
+            minimum.append(row['2nd_stock']) 
+        else:
+            minimum.append(row['1st_stock']) 
+
+// Create 'minimum' column
+product_inventory['minimum'] = minimum
 ```
