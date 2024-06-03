@@ -75,15 +75,14 @@ sales_data = pd.read_excel(r"sales.xlsx")
 
 
 //3 Declare stores's 3 letter code in lists
-// Declare stores sell the main product line - women fashion
+// Stores sell women's clothes
 stores = ['BGI', 'DNA', 'DNG', 'GLA', 'HCM', 'HNO', 'HYE', 'LAN', 'QNA', 'QNH', 'TBH', 'THA', 'TNG', 'VPH', 'VTB']
--- Declare stores sell secondary product line - men fashion
+// Stores sell men's clothes
 men_stores = ['BGI', 'DNG', 'GLA', 'HCM', 'HNO', 'LAN', 'THA', 'TNG', 'VPH', 'VTB']
 ```
 ### Step 2: Process inventory data
 First, I create `product_code`, `size`, `product_group`, `product_line` columns from `product_id`
 ```c
-//Extract 'product_code', 'size', 'product_line' and 'product_group' from 'product_id'
 inventory_data['product_code'] = inventory_data['product_id'].str[0:7]
 inventory_data['size'] = inventory_data['product_id'].str[8:9]
 inventory_data['product_line'] = inventory_data['product_id'].str[2:3]
@@ -103,7 +102,6 @@ plt.show()
 ### Step 3: Process sales data
 Similar to the inventory table above, I also created the columns `product_code`, `size`, `product_group`, `product_line` from `product_id`.
 ```c
-// Extract 'product_code', 'size', 'product_line' and 'product_group' from 'product_id'
 sales_data['product_code'] = sales_data['product_id'].str[0:7]
 sales_data['product_group'] = sales_data['product_id'].str[0:2]
 sales_data['product_line'] = sales_data['product_id'].str[2:3]
