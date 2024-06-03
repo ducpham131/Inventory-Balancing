@@ -32,7 +32,7 @@ The `product_id` consists of 9 characters and contains encrypted information abo
 
 - Product line: The third character in “product_id” represents the product line. In this dataset, there are 2 product lines: women's clothes corresponding to the letter W and men's clothes corresponding to the letter M.
 - Product number: The next 4 digits are the product code used to distinguish products in the same group.
-- Size: The last 2 characters represent the size of the product. There are 5 sizes **Small**, **Medium**, **Large**, **X-Large**, **XX-Large** in the order of *S1*, *S2*, *S3*, *S4*, *S5*.
+- Size: The last 2 characters represent the size of the product. There are 5 sizes `Small`, `Medium`, `Large`, `X-Large`, `XX-Large` in the order of `S1`, `S2`, `S3`, `S4`, `S5`.
 > For example:
 >   S1 - Small size
 
@@ -105,4 +105,20 @@ Similar to the inventory table above, I also created the columns `product_code`,
 sales_data['product_code'] = sales_data['product_id'].str[0:7]
 sales_data['product_group'] = sales_data['product_id'].str[0:2]
 sales_data['product_line'] = sales_data['product_id'].str[2:3]
+```
+### Step 4: Get sales quantity of each Product Code in stores
+I use `pivot_table` to create a `sales` table, with new columns being the number of sales at stores for each *Product Code*.
+Next I create the table `inventory_code` including the existing codes in the warehouses.
+Finally, I use `left join` to combine the `inventory_code` and `sales` tables to get the sales quantity of each *Product Code*  at the stores.
+```c
+ //1 Transform Sales data into Wide data 
+sales = sales_data.pivot_table(index = ['product_code','product_group','product_line'], 
+                               columns = 'store', values = 'quanity', aggfunc = 'sum', fill_value = 0).reset_index()
+
+//2 Create a Dataframe contains all 'product_code' are stocking in stores
+inventory_code = inventory_data[['product_code','product_line','product_group']].drop_duplicates()
+
+//3 Merge together 
+inventory_sales = inventory_code.merge(sales, on = ['product_code','product_line','product_group'], 
+                                       how ='left').fillna(0)
 ```
