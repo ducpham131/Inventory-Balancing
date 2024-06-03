@@ -26,10 +26,16 @@ The `product_id` consists of 9 characters and contains encrypted information abo
 
 <img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/0f1d4018-7508-498f-865f-f4aa26553e6c" alt="..." width="500" />
 
-- Product Rroup: denoted by the first 2 numbers of product_id. For example: 40 - Office wear Product group.
+- Product Rroup: denoted by the first 2 numbers of product_id.
+> For example:
+>   40 - Office wear Product group.
+
 - Product line: The third character in “product_id” represents the product line. In this dataset, there are 2 product lines: women's clothes corresponding to the letter W and men's clothes corresponding to the letter M.
 - Product number: The next 4 digits are the product code used to distinguish products in the same group.
-- Size: The last 2 characters represent the size of the product. There are 5 sizes “Small”, “Medium”, “Large”, “X-Large”, “XX-Large” in the order of “S1”, “S2”, “S3”, “S4”, “S5”. For example: S1 - Small size
+- Size: The last 2 characters represent the size of the product. There are 5 sizes **Small**, **Medium**, **Large**, **X-Large**, **XX-Large** in the order of *S1*, *S2*, *S3*, *S4*, *S5*.
+> For example:
+>   S1 - Small size
+
 ### Table 1: sales
 The sales table contains information about the stores' orders for 6 months, each line records 1 product sold.
 |store|order_time|order_id|customer_name|product_id|quantity|
