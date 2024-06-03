@@ -10,7 +10,7 @@ For fashion items, having a variety of product sizes is crucial to accommodate t
 
 Based on the inventory data of the stores in the system, I was tasked with creating transfer orders to balance the products across the stores. The objective of this activity is to leverage the available sizes in stock at certain stores to fill size gaps in others. Additionally, the aim is to gather products with low and sparse inventory from various stores to the best-selling stores. This ensures there are enough items on display shelves and increases the likelihood of selling out by the end of season.
 
-This task consumes a lot of time and operations when done on spreadsheets when dealing with large amounts of data. So I replaced the spreadsheet with Python to save time and improve performance.
+This task consumes a lot of time and operations when done on spreadsheets when dealing with large amounts of data. So I decided to replace the spreadsheet with Python to save time and improve performance.
 ## Datasets
 
 <img src="https://github.com/ducpham131/Inventory-Balancing/assets/169105426/70f63071-4f47-44c5-8cbd-e81bc96492bb" alt="..." width="500" />
@@ -500,8 +500,7 @@ def result(send_store, receive_store):
 ### Step 17: Draw plots
 Now we have enough tools to transfer products between stores. However, it is difficult to decide which stores to transfer products to, how many products to transfer, and the priority order of stores for distribution. Because the source of transferable products and the resources used to move goods are limited, priority should be given to filling stores with good sales performance within the system. To solve this problem, I use plots to quickly make decisions about moving products between stores.
 
-I use a heatmap to represent the transfer quantities between stores. In this plot, I can quickly decide which transfer pairs will be optimal based on the total quantity for each transfer. 
->For example, for the receiving store DNA, I can choose the HCM or VTB store to transfer goods from, instead of other stores with lower efficiency. Additionally, I can identify stores that have a large number of transferable products, which means these stores are holding more inventory than others.
+I use a heatmap to represent the transfer quantities between stores. 
 ```c
 send_receive = transfer(send_stores, receive_stores)
 
@@ -521,8 +520,10 @@ plt.show()
 ```
 ![heatmap](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/5003d67f-6392-469a-988b-ab5023fac955)
 
-Next, I use a scatter plot to represent the relationship between revenue and inventory quantity of each store. I can observe which store is performing the best in sales, which store needs to be restocked, and which store is holding too much inventory compared to its sales capacity.
-> For example, the DNA store has the best sales but a low inventory level, so it should be prioritized for restocking. Conversely, the VTB and HCM stores have average sales but are holding nearly double the inventory compared to other stores in the same segment, so their excess inventory should be redistributed to optimize resources.
+In this plot, I can quickly decide which transfer pairs will be optimal based on the total quantity for each transfer. 
+>For example, for the receiving store DNA, I can choose the HCM or VTB store to transfer goods from, instead of other stores with lower efficiency. Additionally, I can identify stores that have a large number of transferable products, which means these stores are holding more inventory than others.
+
+Next, I use a scatter plot to represent the relationship between revenue and inventory quantity of each store. 
 ```c
 inventory_group = inventory_melt.groupby(by = 'store').agg({'stock':'sum'}).reset_index()
 sales_group = sales_data.groupby(by = 'store').agg({'quantity':'sum'}).reset_index()
@@ -564,6 +565,10 @@ plt.legend(handles=handles)
 plt.show()
 ```
 ![scatter](https://github.com/ducpham131/Inventory-Balancing/assets/169105426/453dd0a6-266a-4ea1-a67b-91ff493a975b)
+
+I can observe which store is performing the best in sales, which store needs to be restocked, and which store is holding too much inventory compared to its sales capacity.
+> For example, the DNA store has the best sales but a low inventory level, so it should be prioritized for restocking. Conversely, the VTB and HCM stores have average sales but are holding nearly double the inventory compared to other stores in the same segment, so their excess inventory should be redistributed to optimize resources.
+
 ### Step 18: Perform transfering
 In this step, I pair the stores to create Data Frames for sending and receiving. By using the functions above, I can quickly perform the transfer. Here is an example of how I work:
 ```c
