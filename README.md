@@ -47,20 +47,13 @@ Additionally, it's important to note that some stores only sell women's clothing
 |product_id|product_name|total_inventory|BGI|DNA|DNG|GLA|HCM|HNO|HYE|LAN|QNA|QNH|TBH|THA|TNG|VPH|VTB|
 |:---------|:----------:|:-------------:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|--:|
 |10W7740S2|Short-sleeve shirt|191|14|17|15|11|12|11|15|16|13|11|11|10|12|11|12|
-|10W7075S2|Short-sleeve shirt|174|11|16|10|6|9|11|11|14|11|15|11|10|15|10|14|
 |20W4085S2|Shorts|167|10|13|8|7|8|10|13|14|11|16|9|10|14|8|16|
-|10W7740S3|Short-sleeve shirt|158|10|17|9|9|8|10|10|11|11|12|9|8|10|8|16|
-|10W7075S3|Short-sleeve shirt|152|10|10|5|7|9|8|11|11|10|11|8|10|12|15|15|
 |31W3580S2|Knit dress|152|9|12|12|1|11|11|13|11|11|10|8|8|15|10|10|
-|31W3555S2|Knit dress|145|8|14|11|5|8|7|7|11|12|12|9|8|12|8|13|
-|20M5070S3|Shorts|130|13|0|21|20|3|12|0|3|0|0|0|13|18|19|8|
 |11W8040S1|Long-sleeve shirt|129|3|14|11|1|7|3|4|8|2|9|12|8|4|17|26|
 |20W4085S1|Shorts|125|10|8|8|5|4|7|11|9|9|10|6|8|10|10|10|
-|10M5041S2|Short-sleeve shirt|117|8|0|16|15|10|12|0|7|0|0|0|7|15|11|16|
-|11W8979S1|Long-sleeve shirt|117|11|7|9|5|12|6|4|9|3|10|15|6|6|4|10|
 ## Implementation steps
 ### Step 1: Prepare
-The first step I took was to import the necessary libraries, import data from the "inventory" and "sales" tables, and declare the stores in lists.
+The first step I took was to import the necessary libraries, import data from the *inventory* and *sales* tables, and declare the stores in lists.
 ```c
 //1 Import libraries
 import pandas as pd
