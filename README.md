@@ -2,7 +2,7 @@
 ## Introduction
 In this project, I use Python to coordinate inventory at stores within the system. By using historical sales data and current inventory data, I perform analysis and evaluation to ensure products are getting to the right stores where they are in demand, minimizing stockouts, and preventing overcrowding at stores with excessive inventory.
 ## Business context
-The data used pertains to fashion items at a retailer with distribution stores across the country. Products are distributed to these stores for storage, display on shelves, and sales.
+The used dataset pertains to fashion items at a retailer with distribution stores across the country. Products are distributed to these stores for storage, display on shelves, and sales.
 
 For fashion items, having a variety of product sizes is crucial to accommodate the diverse needs of customers. The absence of sizes within the same product can potentially hinder product sales, as customers may struggle to find the right size. Therefore, ensuring that stores have adequate stock of products in various sizes is essential to facilitate faster sales, particularly by the end of the season.
 
